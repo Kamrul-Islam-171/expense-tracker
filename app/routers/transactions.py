@@ -54,6 +54,42 @@ def get_transactions(
 
     return transactions
 
+
+@router.get(
+    "/filter",
+    response_model=list[TransactionResponse]
+)
+def filter_transactions(
+    type: Optional[str] = Query(default=None),
+    category: Optional[str] = Query(default=None),
+    minimum_amount: Optional[float] = Query(default=None, gt=0),
+    maximum_amount: Optional[float] = Query(default=None, gt=0),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    query = db.query(Transaction).filter(
+        Transaction.owner_id == current_user.id
+    )
+
+    if type:
+        query = query.filter(Transaction.type == type)
+
+    if category:
+        query = query.filter(Transaction.category == category)
+
+    if minimum_amount is not None:
+        query = query.filter(
+            Transaction.amount >= minimum_amount
+        )
+
+    if maximum_amount is not None:
+        query = query.filter(
+            Transaction.amount <= maximum_amount
+        )
+
+    return query.all()
+
+
 @router.get(
     "/{transaction_id}",
     response_model=TransactionResponse
@@ -133,37 +169,3 @@ def delete_transaction(
     return {
         "message": "Transaction deleted successfully"
     }
-
-@router.get(
-    "/filter",
-    response_model=list[TransactionResponse]
-)
-def filter_transactions(
-    type: Optional[str] = Query(default=None),
-    category: Optional[str] = Query(default=None),
-    minimum_amount: Optional[float] = Query(default=None, gt=0),
-    maximum_amount: Optional[float] = Query(default=None, gt=0),
-    db: Session = Depends(get_db),
-    current_user: User = Depends(get_current_user)
-):
-    query = db.query(Transaction).filter(
-        Transaction.owner_id == current_user.id
-    )
-
-    if type:
-        query = query.filter(Transaction.type == type)
-
-    if category:
-        query = query.filter(Transaction.category == category)
-
-    if minimum_amount is not None:
-        query = query.filter(
-            Transaction.amount >= minimum_amount
-        )
-
-    if maximum_amount is not None:
-        query = query.filter(
-            Transaction.amount <= maximum_amount
-        )
-
-    return query.all()    
