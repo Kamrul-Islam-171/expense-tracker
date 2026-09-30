@@ -10,7 +10,7 @@ from app.main import app
 from app.database import Base, get_db
 
 
-# Test database
+
 SQLALCHEMY_DATABASE_URL = "sqlite://"
 
 engine = create_engine(
@@ -35,7 +35,7 @@ def override_get_db():
         db.close()
 
 
-# Use test database instead of PostgreSQL
+
 app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
@@ -50,7 +50,7 @@ def reset_database():
 
 
 def get_auth_headers():
-    # Register user
+    
     client.post(
         "/auth/register",
         json={
@@ -60,7 +60,6 @@ def get_auth_headers():
         }
     )
 
-    # Login
     response = client.post(
         "/auth/login",
         data={
@@ -90,10 +89,6 @@ def create_test_transaction(headers):
     )
 
 
-# --------------------------------
-# 1. Create transaction
-# --------------------------------
-
 def test_create_transaction():
     headers = get_auth_headers()
 
@@ -108,10 +103,6 @@ def test_create_transaction():
     assert data["type"] == "expense"
     assert data["category"] == "Food"
 
-
-# --------------------------------
-# 2. Get all transactions
-# --------------------------------
 
 def test_get_transactions():
     headers = get_auth_headers()
@@ -131,9 +122,6 @@ def test_get_transactions():
     assert data[0]["title"] == "Lunch"
 
 
-# --------------------------------
-# 3. Get specific transaction
-# --------------------------------
 
 def test_get_specific_transaction():
     headers = get_auth_headers()
@@ -155,9 +143,6 @@ def test_get_specific_transaction():
     assert data["title"] == "Lunch"
 
 
-# --------------------------------
-# 4. Update transaction
-# --------------------------------
 
 def test_update_transaction():
     headers = get_auth_headers()
@@ -185,10 +170,6 @@ def test_update_transaction():
     assert data["title"] == "Dinner"
     assert data["amount"] == 800
 
-
-# --------------------------------
-# 5. Delete transaction
-# --------------------------------
 
 def test_delete_transaction():
     headers = get_auth_headers()
